@@ -9,18 +9,29 @@ terraform {
 
 provider "newrelic" {}
 
+
 resource "newrelic_one_dashboard" "dashboard" {
   name = var.dashboard_name
+  permissions = "public_read_only"
 
-  page {
-    name = var.widget_name
+  dynamic "page" {
+    for_each = var.resources
+    content {
+      name = page.value["tab"]
+      dynamic "widget_line" {
+        for_each = page.value["title"]
+        content {
+          row    = (abs(format("%.0f", (widget_line.key / 3))) * 4) + 1
+          column = (((widget_line.key % 3) * 4) + 1)
+          height = 4
+          width  = 4
 
-    widget_billboard {
-      title  = var.widget_title
-      row    = 1
-      column = 1
-      nrql_query {
-        query = var.nrql_query
+          title  = upper(page.value["title"][widget_line.key])
+
+          nrql_query {
+            query = page.value["query"][widget_line.key]
+          }
+        }
       }
     }
   }

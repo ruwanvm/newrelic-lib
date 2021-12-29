@@ -10,3 +10,7 @@ variable "widget_title" {
 variable "nrql_query" {
   default = ""
 }
+
+variable "resources" {
+  default = ""
+}
